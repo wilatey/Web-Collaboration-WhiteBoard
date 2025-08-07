@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme{
+  --color-border: hsl(var(--border));
+  --color-background: hsl(var(--background));
+
+  --color-primary: hsl(var(--primary));
+
+  --color-card: hsl(var(--card));
+
+  --animate-fade-in: fade-in 0.4s ease-out 
+}
