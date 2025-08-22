@@ -1,21 +1,14 @@
-// import { motion } from "motion/react";
-import React from "react";
-import { AuroraBackground } from "./ui/aurora-background";
+import { motion } from "motion/react"
+import React from "react"
 
 export function Background() {
   return (
-    <AuroraBackground>
-      <motion.div
-        initial={{ opacity: 0.0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: 0.3,
-          duration: 0.8,
-          ease: "easeInOut",
-        }}
-        className=" relative flex flex-col gap-4 items-center justify-center px-4">
-        </motion.div>
-    </AuroraBackground>
+    <motion.div
+      className="fixed inset-0 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 animate-aurora"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.7 }}
+      transition={{ duration: 2, ease: "easeInOut" }}
+    />
   );
 }
 

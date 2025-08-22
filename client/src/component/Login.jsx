@@ -1,38 +1,38 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 export function Login({ onSubmit }) {
     const [username, setUsername] = useState("")
+    const navigate = useNavigate();
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSubmit(username);
+        setUsername( e.target.value );
+        navigate("/dashboard");
+    }
+
     return (
         <>
-        <div className=" container relative px-15 py-10 bg-primary border border-border rounded-full">
-            <h1 className="text-5xl">Welcome</h1>
-            <p className="text-3xl m-2">Please enter your username</p>
-
-
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    onSubmit(username)
-                }}
-                >
-
+            {/* create a form and input for username, then submit it and call onSubmit with the username 
+            After that, it will redirect to the dashboard
+            */}
+            <form onSubmit={handleSubmit}>
                     <div className="w-full px-2 py-1 ">
                         <div>
-
                         <input
                             type="text"
                             value={username}
                             placeholder="Type name"
                             id="username"
                             name="username"
-                            onChange={(e) => { setUsername(e.target.value) }}
-                            className="py-1 justify-center text-center text-2xl *:rounded-md border border-input bg-background focus:outline-hidden focus:ring-1 m-2"
+                            onChange={{handleSubmit}}
+                            className="py-1 p-20 justify-center text-center text-2xl *:rounded-md border border-input bg-background focus:outline-none focus:ring-1"
                             />
                         </div>
-                    <button type="submit" className="cosmic-button border w-200 my-5 gap-2"> Submit form </button>
+                    <button type="submit" className="cosmic-button border w-200 my-5"> Submit form </button>
                 </div>
             </form>
-        </div>
         </>
     )
 }
