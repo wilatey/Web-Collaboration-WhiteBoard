@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "build": "^0.1.4",
+    "npm-check": "^6.0.1",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"
   }

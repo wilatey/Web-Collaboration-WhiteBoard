@@ -16,16 +16,19 @@ export function Login({ onSubmit }) {
                 }}
                 >
 
-                <div className="w-full px-2 py-1 ">
-                    <input
-                        type="text"
-                        value={username}
-                        placeholder="Type name"
-                        id="username"
-                        name="username"
-                        onChange={(e) => { setUsername(e.target.value) }}
-                        className="py-1 justify-center text-center text-2xl *:rounded-md border border-input bg-background focus:outline-hidden focus:ring-1 m-2"
-                        />
+                    <div className="w-full px-2 py-1 ">
+                        <div>
+
+                        <input
+                            type="text"
+                            value={username}
+                            placeholder="Type name"
+                            id="username"
+                            name="username"
+                            onChange={(e) => { setUsername(e.target.value) }}
+                            className="py-1 justify-center text-center text-2xl *:rounded-md border border-input bg-background focus:outline-hidden focus:ring-1 m-2"
+                            />
+                        </div>
                     <button type="submit" className="cosmic-button border w-200 my-5 gap-2"> Submit form </button>
                 </div>
             </form>
