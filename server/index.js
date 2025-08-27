@@ -16,8 +16,6 @@ const broadcast = (message) => {
   });
 };
 
-
-
 const handleMessage = (bytes, uuid) => {
 
     const message = JSON.parse(bytes.toString())
@@ -41,7 +39,7 @@ const handleMessage = (bytes, uuid) => {
                 username: user.username,
                 data: message.data,
             })
-            console.log(`${user.username} is drawing: ${JSON.stringify(message.data)}`)
+            console.log(`${user.username} is drawing: ${JSON.stringify({ left: message.data.left, top: message.data.top })}`)
             break;
         
         default:
@@ -66,7 +64,6 @@ const handleClose = uuid => {
 }
 
 wsServer.on("connection", (connection, request) => {
-    //ws://127.0.0.1:8000?username=Wilson
     const { username } = url.parse(request.url, true).query
 
     const uuid = uuidv4()

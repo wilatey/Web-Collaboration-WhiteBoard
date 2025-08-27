@@ -1,7 +1,6 @@
 import { motion } from "motion/react"
-import React from "react"
 
-export function Background() {
+export default function Background() {
   return (
     <motion.div
       className="fixed inset-0 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 "
@@ -12,4 +11,3 @@ export function Background() {
   );
 }
 
-export default Background;
