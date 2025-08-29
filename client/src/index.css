@@ -1,11 +1,12 @@
-@import 'tailwindcss';
-@import '@radix-ui/themes/styles.css';
+@import "tailwindcss";
+@import "@radix-ui/themes/styles.css";
 
 @theme {
   --color-border: hsl(var(--border));
   --color-background: hsl(var(--background));
   --color-primary: hsl(var(--primary));
   --color-card: hsl(var(--card));
+  --color-foreground: hsl(var(--foreground));
 
   --animate-fade-in: fade-in 0.6s ease-out forwards;
   --animate-pulse: pulse 4s ease-in-out infinite;
@@ -38,13 +39,14 @@
     --card: 0 0% 100%;
     --primary: 50 60% 90%;
     --border: 214 32% 91%;
+    --foreground: 222.2 47.4% 11.2%;
   }
   html {
     @apply scroll-smooth;
   }
   body {
     @reference bg-background text-foreground transition-colors duration-300;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings: "rlig" 1, "calt" 1;
     margin-top: 40px;
   }
 }
@@ -82,6 +84,44 @@
   @apply px-6 py-2 rounded-full bg-primary font-medium 
            transition-all duration-300 hover:shadow-[0_0_10px_rgba(139,92,246,0.5)] 
            hover:scale-105 active:scale-95;
+}
+
+@utility toolbar {
+  @apply bg-card border border-border rounded-lg p-4 shadow-lg max-w-full;
+  animation: var(--animate-fade-in);
+}
+
+@layer components {
+  .toolbar-button {
+    @apply w-full h-12 flex items-center justify-center rounded-md 
+           bg-primary/20 text-foreground hover:bg-primary/40 
+           active:bg-primary/60 transition-all duration-200 hover:animate-pulse;
+  }
+
+  .toolbar-color-picker {
+    @apply w-full h-10 rounded-md border border-border 
+           cursor-pointer transition-all duration-200 
+           hover:shadow-[0_0_8px_rgba(139,92,246,0.3)];
+  }
+
+  .toolbar-slider {
+    @apply w-full accent-primary rounded-md;
+  }
+
+  .toolbar-size-input {
+    @apply w-full h-10 rounded-md border border-border bg-card px-2 text-foreground 
+           focus:outline-none focus:ring-2 focus:ring-primary/50;
+  }
+
+  .toolbar-size-input--invalid {
+    @apply border-red-500;
+  }
+
+  .rt-TooltipContent {
+    @apply bg-primary text-white rounded-md px-2 py-1 text-sm 
+           animate-fade-in shadow-md;
+    border: 1px solid var(--color-border);
+  }
 }
 
 #root {

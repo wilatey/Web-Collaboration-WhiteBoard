@@ -1,9 +1,8 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom"
-import { LoginPage } from "./pages/LoginPage"
-import { Dashboard } from "./pages/Dashboard"
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { LoginPage } from "./pages/LoginPage";
+import { Dashboard } from "./pages/Dashboard";
 
 function App() {
-
   return (
     <>
       <BrowserRouter>
@@ -13,7 +12,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

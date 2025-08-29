@@ -64,7 +64,7 @@ const handleClose = uuid => {
 }
 
 wsServer.on("connection", (connection, request) => {
-    const { username } = url.parse(request.url, true).query
+    const { username } = url.parse(request.l, true).query
 
     const uuid = uuidv4()
     console.log(`New connection: ${username} (${uuid})`);
