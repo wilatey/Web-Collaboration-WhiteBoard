@@ -3,17 +3,13 @@ import * as fabric from "fabric";
 import { BiRectangle, BiCircle, BiEraser } from "react-icons/bi";
 import { Flex, IconButton } from "@radix-ui/themes";
 import { Tooltip, TooltipProvider } from "@radix-ui/react-tooltip";
+import Settings from "../component/Settings";
 
 export const Dashboard = () => {
   const canvasRef = useRef(null);
   const fabricCanvas = useRef(null);
-  const [fillColor, setFillColor] = useState("#000000");
-  const [shapeSize, setShapeSize] = useState(50);
-  const [inputValue, setInputValue] = useState("50");
-  const [isInputValid, setIsInputValid] = useState(true);
 
   useEffect(() => {
-    const container = canvasRef.current.parentElement;
     fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
       backgroundColor: "#fff",
       width: 1000,
@@ -22,21 +18,10 @@ export const Dashboard = () => {
 
     fabricCanvas.current.renderAll();
 
-    const handleResize = () => {
-      fabricCanvas.current.setDimensions({
-        width: container.clientWidth,
-        height: container.clientHeight,
-      });
-      fabricCanvas.current.renderAll();
-    };
-
-    window.addEventListener("resize", handleResize);
-
     return () => {
       if (fabricCanvas.current) {
         fabricCanvas.current.dispose();
       }
-      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -45,9 +30,9 @@ export const Dashboard = () => {
       const rect = new fabric.Rect({
         top: 100,
         left: 50,
-        fill: fillColor,
-        width: shapeSize,
-        height: shapeSize * 0.6,
+        fill: "red",
+        width: 150,
+        height: 70,
       });
       fabricCanvas.current.add(rect);
     }
@@ -58,36 +43,11 @@ export const Dashboard = () => {
       const circle = new fabric.Circle({
         top: 100,
         left: 100,
-        fill: fillColor,
-        radius: shapeSize / 2,
+        fill: "blue",
+        radius: 30,
       });
       fabricCanvas.current.add(circle);
     }
-  };
-
-  const handleShapeSizeKeyDown = (e) => {
-    if (e.key === "Enter") {
-      const value = Number(e.target.value);
-      if (value >= 10 && value <= 100) {
-        setShapeSize(value);
-        setInputValue(value.toString());
-        setIsInputValid(true);
-      } else {
-        setIsInputValid(false);
-      }
-    }
-  };
-
-  const handleShapeSizeChange = (e) => {
-    setInputValue(e.target.value);
-    const value = Number(e.target.value);
-    setIsInputValid(value >= 10 && value <= 100);
-  };
-
-  const clearCanvas = () => {
-    fabricCanvas.current.clear();
-    fabricCanvas.current.backgroundColor = "white";
-    fabricCanvas.current.renderAll();
   };
 
   return (
@@ -109,77 +69,46 @@ export const Dashboard = () => {
 
           <div className="flex max-h-full overflow-auto max-w-full">
             <canvas
+              id="canvas"
               ref={canvasRef}
               className="border flex flex-1 flex-col rounded-lg shadow-lg"
+            />
+            <Settings
+              canvas={fabricCanvas.current}
+              className="toolbar-border"
             />
           </div>
         </div>
         <div className="w-1/6 flex flex-col items-center justify-center sticky top-4">
-          <div className="toolbar">
-            <h3 className="text-lg text-wrap font-semibold text-foreground mb-4 text-center">
-              Toolbar
-            </h3>
-            <Flex direction="column" gap="4" align="center" className="w-full">
+          <div className="toolbar w-1/4 h-1/6 dark:bg-gray-800/70">
+            <Flex direction="column" gap="5" align="center" className="w-full">
               <TooltipProvider>
                 <Tooltip content="Draw Rectangle">
                   <IconButton
                     size="3"
-                    color="gray"
+                    color="white"
                     variant="soft"
                     onClick={addRectangle}
-                    className="toolbar-button"
                   >
-                    <BiRectangle size={30} className="text-foreground" />
+                    <BiRectangle
+                      size={30}
+                      className="fill-white graphic_hover m-2"
+                    />
                   </IconButton>
                 </Tooltip>
                 <Tooltip content="Draw Circle">
                   <IconButton
                     size="3"
-                    color="gray"
+                    color="white"
                     variant="soft"
                     onClick={addCircle}
                     className="toolbar-button"
                   >
-                    <BiCircle size={30} className="text-foreground" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip content="Clear Canvas">
-                  <IconButton
-                    size="3"
-                    color="gray"
-                    variant="soft"
-                    onClick={clearCanvas}
-                    className="toolbar-button"
-                  >
-                    <BiEraser size={30} className="text-foreground" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip content="Select Fill Color">
-                  <input
-                    type="color"
-                    value={fillColor}
-                    onChange={(e) => setFillColor(e.target.value)}
-                    className="toolbar-color-picker"
-                  />
-                </Tooltip>
-                <Tooltip content="Set Shape Size">
-                  <div className="w-full">
-                    <h3 size="2" className="text-foreground mb-2 block">
-                      Shape Size: {shapeSize}px
-                    </h3>
-                    <input
-                      type="number"
-                      min="10"
-                      max="100"
-                      value={inputValue}
-                      onChange={handleShapeSizeChange}
-                      onKeyDown={handleShapeSizeKeyDown}
-                      className={`toolbar-size-input ${
-                        !isInputValid ? "toolbar-size-input--invalid" : ""
-                      }`}
-                      placeholder="10-100"
+                    <BiCircle
+                      size={30}
+                      className="fill-white graphic_hover m-2"
                     />
-                  </div>
+                  </IconButton>
                 </Tooltip>
               </TooltipProvider>
             </Flex>

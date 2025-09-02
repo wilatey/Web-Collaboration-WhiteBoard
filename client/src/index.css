@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@radix-ui/themes/styles.css";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-border: hsl(var(--border));
@@ -49,6 +50,10 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     margin-top: 40px;
   }
+
+  .Setting {
+    @apply fixed flex flex-col flex-1 border-1 rounded-lg p-4;
+  }
 }
 
 @utility container {
@@ -89,6 +94,10 @@
 @utility toolbar {
   @apply bg-card border border-border rounded-lg p-4 shadow-lg max-w-full;
   animation: var(--animate-fade-in);
+}
+
+@utility graphic_hover {
+  @apply hover:bg-gray-500/70 animate-pulse;
 }
 
 @layer components {
