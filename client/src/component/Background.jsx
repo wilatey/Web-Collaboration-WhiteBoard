@@ -1,4 +1,4 @@
-import { motion } from "motion/react"
+import { motion } from "motion/react";
 
 export default function Background() {
   return (
@@ -10,4 +10,3 @@ export default function Background() {
     />
   );
 }
-

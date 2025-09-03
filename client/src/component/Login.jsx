@@ -28,7 +28,7 @@ export function Login() {
               id="username"
               name="username"
               onChange={(e) => setUsername(e.target.value)}
-              className="py-1 p-20 justify-center text-center text-2xl *:rounded-md border border-input bg-background focus:outline-none focus:ring-1"
+              className="py-1 p-20 justify-center text-center text-2xl *:rounded-md border border-input bg-amber-50 focus:outline-none focus:ring-1"
             />
           </div>
           {error && <p className="text-red-500 mt-2">{error}</p>}

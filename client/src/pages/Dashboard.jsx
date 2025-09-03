@@ -7,46 +7,50 @@ import Settings from "../component/Settings";
 
 export const Dashboard = () => {
   const canvasRef = useRef(null);
-  const fabricCanvas = useRef(null);
+  const [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
-    fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
-      backgroundColor: "#fff",
-      width: 1000,
-      height: 700,
-    });
+    if (canvasRef.current) {
+      const initCanvas = new fabric.Canvas(canvasRef.current, {
+        backgroundColor: "#fff",
+        width: 1000,
+        height: 700,
+      });
 
-    fabricCanvas.current.renderAll();
+      initCanvas.renderAll();
 
-    return () => {
-      if (fabricCanvas.current) {
-        fabricCanvas.current.dispose();
-      }
-    };
+      setCanvas(initCanvas);
+
+      return () => {
+        initCanvas.dispose();
+      };
+    }
   }, []);
 
   const addRectangle = () => {
-    if (fabricCanvas.current) {
+    if (canvas) {
       const rect = new fabric.Rect({
         top: 100,
         left: 50,
-        fill: "red",
+        fill: "#0000ff",
         width: 150,
         height: 70,
+        selectable: true,
       });
-      fabricCanvas.current.add(rect);
+      canvas.add(rect);
     }
   };
 
   const addCircle = () => {
-    if (fabricCanvas.current) {
+    if (canvas) {
       const circle = new fabric.Circle({
         top: 100,
         left: 100,
-        fill: "blue",
+        fill: "#00ff00",
         radius: 30,
+        selectable: true,
       });
-      fabricCanvas.current.add(circle);
+      canvas.add(circle);
     }
   };
 
@@ -73,15 +77,12 @@ export const Dashboard = () => {
               ref={canvasRef}
               className="border flex flex-1 flex-col rounded-lg shadow-lg"
             />
-            <Settings
-              canvas={fabricCanvas.current}
-              className="toolbar-border"
-            />
+            <Settings canvas={canvas} />
           </div>
         </div>
         <div className="w-1/6 flex flex-col items-center justify-center sticky top-4">
-          <div className="toolbar w-1/4 h-1/6 dark:bg-gray-800/70">
-            <Flex direction="column" gap="5" align="center" className="w-full">
+          <div className="toolbar w-2/8 h-1/6 dark:bg-gray-800/70">
+            <Flex direction="column" gap="3" align="center" className="w-full">
               <TooltipProvider>
                 <Tooltip content="Draw Rectangle">
                   <IconButton
@@ -90,10 +91,9 @@ export const Dashboard = () => {
                     variant="soft"
                     onClick={addRectangle}
                   >
-                    <BiRectangle
-                      size={30}
-                      className="fill-white graphic_hover m-2"
-                    />
+                    <div className="graphic_hover">
+                      <BiRectangle size={30} className="fill-white m-2" />
+                    </div>
                   </IconButton>
                 </Tooltip>
                 <Tooltip content="Draw Circle">
@@ -104,10 +104,9 @@ export const Dashboard = () => {
                     onClick={addCircle}
                     className="toolbar-button"
                   >
-                    <BiCircle
-                      size={30}
-                      className="fill-white graphic_hover m-2"
-                    />
+                    <div className="graphic_hover">
+                      <BiCircle size={30} className="fill-white m-2" />
+                    </div>
                   </IconButton>
                 </Tooltip>
               </TooltipProvider>

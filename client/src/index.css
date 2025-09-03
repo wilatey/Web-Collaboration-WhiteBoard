@@ -50,9 +50,13 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     margin-top: 40px;
   }
+}
 
-  .Setting {
-    @apply fixed flex flex-col flex-1 border-1 rounded-lg p-4;
+@utility settings {
+  @apply fixed right-4 top-3/4 flex flex-col flex-1 rounded-lg p-4 gap-4 z-10 dark:bg-gray-600/60;
+  transform: translateY(-50%);
+  &:empty {
+    padding: 0;
   }
 }
 
@@ -97,7 +101,7 @@
 }
 
 @utility graphic_hover {
-  @apply hover:bg-gray-500/70 animate-pulse;
+  @apply hover:bg-gray-500/70 animate-pulse rounded-lg;
 }
 
 @layer components {
