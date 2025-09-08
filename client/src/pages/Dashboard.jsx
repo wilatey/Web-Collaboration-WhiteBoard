@@ -1,22 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import { BiRectangle, BiCircle, BiEraser } from "react-icons/bi";
-import { Flex, IconButton } from "@radix-ui/themes";
+import {
+  BiRectangle,
+  BiCircle,
+  BiEraser,
+  BiDownArrowAlt,
+  BiCard,
+} from "react-icons/bi";
+import { Button, Flex, IconButton } from "@radix-ui/themes";
 import { Tooltip, TooltipProvider } from "@radix-ui/react-tooltip";
 import Settings from "../component/Settings";
+import { useDrawingToggle } from "../../lib/useDrawingToggle";
 
 export const Dashboard = () => {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
+  const { buttonText, toggleDrawing } = useDrawingToggle(canvas);
 
   useEffect(() => {
     if (canvasRef.current) {
       const initCanvas = new fabric.Canvas(canvasRef.current, {
+        isDrawing: false,
         backgroundColor: "#fff",
         width: 1000,
         height: 700,
       });
-
+      initCanvas.freeDrawingBrush = new fabric.PencilBrush(initCanvas);
       initCanvas.renderAll();
 
       setCanvas(initCanvas);
@@ -54,6 +63,14 @@ export const Dashboard = () => {
     }
   };
 
+  const clearCanvas = () => {
+    if (canvas) {
+      canvas.clear();
+      canvas.backgroundColor = "#fff";
+      canvas.renderAll();
+    }
+  };
+
   return (
     <div className=" bg-gray-100 flex flex-col justify-center p-2 rainbow-background">
       <div className="flex w-full max-h-full space-x-4 justify-center">
@@ -81,7 +98,7 @@ export const Dashboard = () => {
           </div>
         </div>
         <div className="w-1/6 flex flex-col items-center justify-center sticky top-4">
-          <div className="toolbar w-2/8 h-1/6 dark:bg-gray-800/70">
+          <div className="toolbar w-2/8 h-1/4 dark:bg-gray-800/70">
             <Flex direction="column" gap="3" align="center" className="w-full">
               <TooltipProvider>
                 <Tooltip content="Draw Rectangle">
@@ -109,8 +126,26 @@ export const Dashboard = () => {
                     </div>
                   </IconButton>
                 </Tooltip>
+                <Tooltip content="Clear Canvas">
+                  <IconButton
+                    size="3"
+                    color="white"
+                    variant="soft"
+                    onClick={clearCanvas}
+                    className="toolbar-button"
+                  >
+                    <div className="graphic_hover">
+                      <BiEraser size={30} className="fill-white m-2" />
+                    </div>
+                  </IconButton>
+                </Tooltip>
               </TooltipProvider>
             </Flex>
+          </div>
+          <div className="flex mt-5">
+            <button onClick={toggleDrawing} className="cosmic-button">
+              {buttonText}
+            </button>
           </div>
         </div>
       </div>

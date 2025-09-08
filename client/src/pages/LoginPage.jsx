@@ -1,7 +1,10 @@
+import { useState } from "react";
 import Background from "../component/Background";
 import { Login } from "../component/Login";
 
 export const LoginPage = () => {
+  const [Username, setUsername] = useState("");
+
   return (
     <div className="title overflow-x-hidden ">
       <Background />
@@ -13,7 +16,7 @@ export const LoginPage = () => {
           <p className="text-2xl m-4 font-light font-sans">
             Please signup with your username
           </p>
-          <Login />
+          <Login onSubmit={setUsername} />
         </div>
       </div>
     </div>
