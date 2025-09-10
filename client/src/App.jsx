@@ -1,14 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { LoginPage } from "./pages/LoginPage";
-import { Dashboard } from "./pages/Dashboard";
+import MyApp from "./pages/MyApp";
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" index element={<LoginPage />}></Route>
-          <Route path="/dashboard" element={<Dashboard />}></Route>
+          <Route path="/*" element={<MyApp />} />
         </Routes>
       </BrowserRouter>
     </>

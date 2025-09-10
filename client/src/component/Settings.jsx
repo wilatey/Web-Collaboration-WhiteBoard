@@ -7,9 +7,6 @@ function Settings({ canvas }) {
   const [height, setheight] = useState("");
   const [diameter, setdiameter] = useState("");
   const [color, setcolor] = useState("");
-  //   const [brushColor, setBrushColor] = useState("#000000");
-  //   const [brushSize, setBrushSize] = useState(5);
-  //   const [drawing, setDrawing] = useState(false);
 
   useEffect(() => {
     if (canvas) {
@@ -68,7 +65,7 @@ function Settings({ canvas }) {
   const handleWidthChange = (e) => {
     const value = e.target.value.replace(/,/g, "");
 
-    const intValue = parseInt(value, 10);
+    const intValue = parseInt(value, 10) || 0;
 
     setwidth(intValue);
 
@@ -79,7 +76,7 @@ function Settings({ canvas }) {
   };
   const handleHeightChange = (e) => {
     const value = e.target.value.replace(/,/g, "");
-    const intValue = parseInt(value, 10);
+    const intValue = parseInt(value, 10) || 0;
 
     setheight(intValue);
 
