@@ -1,23 +1,20 @@
+// Dashboard.jsx (updated for collaborative syncing with unique IDs, full object data, and remote update flag to prevent loops)
 import { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import {
-  BiRectangle,
-  BiCircle,
-  BiEraser,
-  BiDownArrowAlt,
-  BiCard,
-} from "react-icons/bi";
+import { BiRectangle, BiCircle, BiEraser } from "react-icons/bi";
 import { Button, Flex, IconButton } from "@radix-ui/themes";
 import { Tooltip, TooltipProvider } from "@radix-ui/react-tooltip";
 import Settings from "../component/Settings";
 import { useDrawingToggle } from "../../lib/useDrawingToggle";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import { v4 as uuidv4 } from "uuid";
 
 export const Dashboard = ({ username, onLogout }) => {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const { buttonText, toggleDrawing } = useDrawingToggle(canvas);
   const [users, setUsers] = useState([]);
+  const [isRemoteUpdate, setIsRemoteUpdate] = useState(false);
   const ws_URL = `ws://127.0.0.1:8000?username=${encodeURIComponent(
     username || "Guest"
   )}`;
@@ -68,134 +65,216 @@ export const Dashboard = ({ username, onLogout }) => {
       initCanvas.renderAll();
       setCanvas(initCanvas);
 
-      // Sync canvas changes
+      const throttle = (func, delay) => {
+        let last = 0;
+        return (...args) => {
+          const now = Date.now();
+          if (now - last > delay) {
+            last = now;
+            func(...args);
+          }
+        };
+      };
+
+      const throttledSendObject = throttle((obj) => {
+        sendObjectUpdate(obj);
+      }, 50);
+
       initCanvas.on("object:added", handleObjectAdded);
       initCanvas.on("object:modified", handleObjectModified);
       initCanvas.on("path:created", handlePathCreated);
+      initCanvas.on("object:moving", (e) => throttledSendObject(e.target));
+      initCanvas.on("object:scaling", (e) => throttledSendObject(e.target));
+      initCanvas.on("object:rotating", (e) => throttledSendObject(e.target));
 
       return () => {
         initCanvas.off("object:added", handleObjectAdded);
         initCanvas.off("object:modified", handleObjectModified);
         initCanvas.off("path:created", handlePathCreated);
+        initCanvas.off("object:moving", (e) => throttledSendObject(e.target));
+        initCanvas.off("object:scaling", (e) => throttledSendObject(e.target));
+        initCanvas.off("object:rotating", (e) => throttledSendObject(e.target));
         initCanvas.dispose();
       };
     }
   }, []);
 
-  const handleObjectAdded = (event) => {
-    const obj = event.target;
-    if (obj.isType("rect") || obj.isType("circle")) {
-      sendJsonMessage({
-        type: "draw",
-        username,
-        data: {
-          type: obj.type,
-          width: obj.width,
-          height: obj.height,
-          fill: obj.fill,
-        },
-      });
+  const sendObjectUpdate = (obj) => {
+    if (!obj.id) return;
+    const common = {
+      id: obj.id,
+      left: obj.left,
+      top: obj.top,
+      scaleX: obj.scaleX,
+      scaleY: obj.scaleY,
+      angle: obj.angle,
+    };
+    let specific = {};
+    if (obj.type === "rect") {
+      specific = {
+        type: "rect",
+        width: obj.width,
+        height: obj.height,
+        fill: obj.fill,
+      };
+    } else if (obj.type === "circle") {
+      specific = {
+        type: "circle",
+        radius: obj.radius,
+        fill: obj.fill,
+      };
+    } else if (obj.type === "path") {
+      specific = {
+        type: "path",
+        path: obj.path,
+        stroke: obj.stroke,
+        strokeWidth: obj.strokeWidth,
+      };
+    } else {
+      return;
     }
-  };
-
-  const handleObjectModified = (event) => {
-    const obj = event.target;
-    if (obj.isType("rect") || obj.isType("circle")) {
-      sendJsonMessage({
-        type: "draw",
-        username,
-        data: {
-          type: obj.type,
-          width: obj.width,
-          height: obj.height,
-          fill: obj.fill,
-        },
-      });
-    }
-  };
-
-  const handlePathCreated = (event) => {
-    const path = event.path;
     sendJsonMessage({
       type: "draw",
       username,
-      data: {
-        type: "path",
-        path: path.path,
-        stroke: path.stroke,
-        strokeWidth: path.strokeWidth,
-      },
+      data: { ...specific, ...common },
     });
   };
 
+  const handleObjectAdded = (event) => {
+    if (isRemoteUpdate) return;
+    const obj = event.target;
+    if (obj.type === "path") return; // Handled in path:created
+    sendObjectUpdate(obj);
+  };
+
+  const handleObjectModified = (event) => {
+    if (isRemoteUpdate) return;
+    const obj = event.target;
+    sendObjectUpdate(obj);
+  };
+
+  const handlePathCreated = (event) => {
+    if (isRemoteUpdate) return;
+    const path = event.path;
+    path.id = uuidv4();
+    sendObjectUpdate(path);
+  };
+
   const handleDrawMessage = (message) => {
-    if (message.username === username || !canvas) return;
-    const { data } = message;
-    if (data.type === "rect") {
-      const rect = new fabric.Rect({
-        fill: data.fill,
+    const data = message.data;
+    if (data.type === "clear") {
+      setIsRemoteUpdate(true);
+      canvas.clear();
+      setIsRemoteUpdate(false);
+      return;
+    }
+
+    const existingObj = canvas.getObjects().find((obj) => obj.id === data.id);
+    setIsRemoteUpdate(true);
+
+    if (existingObj) {
+      existingObj.set({
+        left: data.left,
+        top: data.top,
         scaleX: data.scaleX,
         scaleY: data.scaleY,
-        selectable: true,
+        angle: data.angle,
       });
-      canvas.add(rect);
-    } else if (data.type === "circle") {
-      const circle = new fabric.Circle({
-        fill: data.fill,
-        scaleX: data.scaleX,
-        scaleY: data.scaleY,
-        selectable: true,
-      });
-      canvas.add(circle);
-    } else if (data.type === "path") {
-      const path = new fabric.Path(data.path, {
-        strokeWidth: data.strokeWidth,
-        fill: "",
-        selectable: false,
-      });
-      canvas.add(path);
+      if (data.type === "rect") {
+        existingObj.set({
+          width: data.width,
+          height: data.height,
+          fill: data.fill,
+        });
+      } else if (data.type === "circle") {
+        existingObj.set({
+          radius: data.radius,
+          fill: data.fill,
+        });
+      } else if (data.type === "path") {
+        existingObj.set({
+          path: data.path,
+          stroke: data.stroke,
+          strokeWidth: data.strokeWidth,
+        });
+      }
+      existingObj.setCoords();
+    } else {
+      let newObj;
+      if (data.type === "rect") {
+        newObj = new fabric.Rect({
+          id: data.id,
+          left: data.left,
+          top: data.top,
+          width: data.width,
+          height: data.height,
+          scaleX: data.scaleX,
+          scaleY: data.scaleY,
+          angle: data.angle,
+          fill: data.fill,
+        });
+      } else if (data.type === "circle") {
+        newObj = new fabric.Circle({
+          id: data.id,
+          left: data.left,
+          top: data.top,
+          radius: data.radius,
+          scaleX: data.scaleX,
+          scaleY: data.scaleY,
+          angle: data.angle,
+          fill: data.fill,
+        });
+      } else if (data.type === "path") {
+        newObj = new fabric.Path(data.path, {
+          id: data.id,
+          left: data.left,
+          top: data.top,
+          scaleX: data.scaleX,
+          scaleY: data.scaleY,
+          angle: data.angle,
+          stroke: data.stroke,
+          strokeWidth: data.strokeWidth,
+          fill: "",
+        });
+      }
+      if (newObj) {
+        canvas.add(newObj);
+      }
     }
     canvas.renderAll();
+    setIsRemoteUpdate(false);
   };
 
   const addRectangle = () => {
-    if (canvas) {
-      const rect = new fabric.Rect({
-        top: 100,
-        left: 50,
-        fill: "#0000ff",
-        width: 150,
-        height: 70,
-        selectable: true,
-      });
-      canvas.add(rect);
-    }
+    const rect = new fabric.Rect({
+      left: 100,
+      top: 100,
+      width: 50,
+      height: 50,
+      fill: canvas.freeDrawingBrush.color || "red",
+      id: uuidv4(),
+    });
+    canvas.add(rect);
   };
 
   const addCircle = () => {
-    if (canvas) {
-      const circle = new fabric.Circle({
-        top: 100,
-        left: 100,
-        fill: "#00ff00",
-        radius: 30,
-        selectable: true,
-      });
-      canvas.add(circle);
-    }
+    const circle = new fabric.Circle({
+      left: 100,
+      top: 100,
+      radius: 25,
+      fill: canvas.freeDrawingBrush.color || "blue",
+      id: uuidv4(),
+    });
+    canvas.add(circle);
   };
 
   const clearCanvas = () => {
-    if (canvas) {
-      canvas.clear();
-      canvas.backgroundColor = "#fff";
-      canvas.renderAll();
-      sendJsonMessage({
-        type: "draw",
-        username,
-        data: { type: "clear" },
-      });
-    }
+    canvas.clear();
+    sendJsonMessage({
+      type: "draw",
+      username,
+      data: { type: "clear" },
+    });
   };
 
   return (
@@ -225,11 +304,15 @@ export const Dashboard = ({ username, onLogout }) => {
             <h1 className="text-4xl font-serif space-x-4 mb-3 flex-wrap">
               Welcome! {username}
             </h1>
-            <Button onClick={onLogout} variant="soft" className="cosmic-button">
+            <botton
+              onClick={onLogout}
+              variant="soft"
+              className="text-stone-800 cosmic-button flex items-center justify-center"
+            >
               Logout
-            </Button>
+            </botton>
           </div>
-          <p className="text-xl font-sans space-x-4 mb-3 flex-wrap">
+          <p className="text-2xl font-sans font-bold space-x-4 mb-3 flex-wrap">
             Collaborative Whiteboard
           </p>
 
@@ -243,7 +326,7 @@ export const Dashboard = ({ username, onLogout }) => {
           </div>
         </div>
         <div className="w-1/6 flex flex-col items-center justify-center sticky top-4">
-          <div className="toolbar w-2/8 h-1/4 dark:bg-gray-800/70">
+          <div className="toolbar w-2/8 h-1/3 dark:bg-gray-800/70">
             <Flex direction="column" gap="3" align="center" className="w-full">
               <TooltipProvider>
                 <Tooltip content="Draw Rectangle">

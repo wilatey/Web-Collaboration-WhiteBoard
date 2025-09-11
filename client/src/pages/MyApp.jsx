@@ -6,7 +6,6 @@ import { Theme } from "@radix-ui/themes";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 export default function MyApp() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
@@ -19,12 +18,10 @@ export default function MyApp() {
     }
     console.log("MyApp handleLogin called with username:", username);
     setUsername(username);
-    setIsAuthenticated(true);
     navigate("/dashboard");
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
     navigate("/");
   };
 
